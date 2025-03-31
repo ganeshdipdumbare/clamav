@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  # Go REST API server
+  api:
+    build:
+      context: ./clamav-server
+      dockerfile: Dockerfile
+    container_name: clamav-api
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      - CLAMD_ADDRESS=clamd:3310
+    depends_on:
+      - clamd
+
+  # ClamAV daemon as a sidecar
+  clamd:
+    image: clamav/clamav:latest
+    platform: linux/amd64
+    container_name: clamd
+    restart: unless-stopped
+    ports:
+      - "3310:3310"
+    environment:
+      - CLAMD_TCP_ADDR=0.0.0.0
+      - CLAMD_TCP_PORT=3310
+    healthcheck:
+      test: ["CMD", "clamdscan", "--ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
