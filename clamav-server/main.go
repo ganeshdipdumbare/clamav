@@ -26,6 +26,24 @@ type Server struct {
 	clamdClient *clamd.Client
 }
 
+// CORS middleware adds CORS headers to allow cross-origin requests
+func corsMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Allow requests from any origin
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+
+		// Handle OPTIONS requests
+		if r.Method == "OPTIONS" {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
+}
+
 // NewServer creates a new Server instance
 func NewServer(clamdAddress string) (*Server, error) {
 	client, err := clamd.NewClient("tcp", clamdAddress)
@@ -190,16 +208,22 @@ func main() {
 		log.Fatalf("Failed to create server: %v", err)
 	}
 
+	// Create a new multiplexer with CORS middleware
+	mux := http.NewServeMux()
+
 	// Define routes
-	http.HandleFunc("/", server.IndexHandler)
-	http.HandleFunc("/ping", server.PingHandler)
-	http.HandleFunc("/version", server.VersionHandler)
-	http.HandleFunc("/scan/text", server.ScanTextHandler)
-	http.HandleFunc("/scan/file", server.ScanFileHandler)
+	mux.HandleFunc("/", server.IndexHandler)
+	mux.HandleFunc("/ping", server.PingHandler)
+	mux.HandleFunc("/version", server.VersionHandler)
+	mux.HandleFunc("/scan/text", server.ScanTextHandler)
+	mux.HandleFunc("/scan/file", server.ScanFileHandler)
 
 	// Serve static files
 	fs := http.FileServer(http.Dir("static"))
-	http.Handle("/static/", http.StripPrefix("/static/", fs))
+	mux.Handle("/static/", http.StripPrefix("/static/", fs))
+
+	// Wrap the mux with CORS middleware
+	handler := corsMiddleware(mux)
 
 	// Get port from environment or use default
 	port := os.Getenv("PORT")
@@ -211,5 +235,5 @@ func main() {
 	serverAddr := fmt.Sprintf("0.0.0.0:%s", port)
 	log.Printf("Starting server on %s", serverAddr)
 	log.Printf("ClamAV daemon address: %s", clamdAddress)
-	log.Fatal(http.ListenAndServe(serverAddr, nil))
+	log.Fatal(http.ListenAndServe(serverAddr, handler))
 }
