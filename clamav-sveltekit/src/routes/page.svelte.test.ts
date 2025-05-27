@@ -8,4 +8,14 @@ describe('/+page.svelte', () => {
 		render(Page);
 		expect(screen.getByRole('heading', { level: 1 })).toBeInTheDocument();
 	});
+
+	test('should render file upload form', () => {
+		render(Page);
+		expect(screen.getByLabelText(/upload file/i)).toBeInTheDocument();
+	});
+
+	test('should render text scanning area', () => {
+		render(Page);
+		expect(screen.getByLabelText(/text to scan/i)).toBeInTheDocument();
+	});
 });
