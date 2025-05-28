@@ -1,0 +1,69 @@
+# SvelteKit / Node.js
+node_modules
+/clamav-sveltekit/node_modules
+/clamav-sveltekit/.svelte-kit
+/clamav-sveltekit/build
+/clamav-sveltekit/package
+/clamav-sveltekit/.env*
+!/clamav-sveltekit/.env.example
+/clamav-sveltekit/vite.config.js.timestamp-*
+/clamav-sveltekit/vite.config.ts.timestamp-*
+
+# Go
+/clamav-server/vendor/
+/clamav-server/*.exe
+/clamav-server/*.exe~
+/clamav-server/*.dll
+/clamav-server/*.so
+/clamav-server/*.dylib
+/clamav-server/*.test
+/clamav-server/*.out
+/clamav-server/go.work
+
+# Docker
+.docker/
+
+# IDE / Editor
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+*.sublime-workspace
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Build artifacts
+dist/
+coverage/
+.nyc_output/
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Cache
+.npm
+.eslintcache
+.stylelintcache
+.prettiercache
+.turbo
+.cache/
+.parcel-cache/
+.rollup.cache/
+tsconfig.tsbuildinfo
+
+# Misc
+*.bak
+*.tmp
+*.temp
+*~ 

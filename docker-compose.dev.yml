@@ -1,19 +1,23 @@
 version: '3.8'
 
 services:
-  # SvelteKit frontend
+  # SvelteKit frontend for development
   frontend:
     build:
       context: ./clamav-sveltekit
-      dockerfile: Dockerfile
-    container_name: clamav-frontend
+      dockerfile: Dockerfile.dev
+    container_name: clamav-frontend-dev
     restart: unless-stopped
     ports:
-      - "3000:3000"
+      - "5173:5173"  # Dev server port
     environment:
-      - NODE_ENV=production
-      - ORIGIN=http://localhost:3000
-      - API_PROXY_TARGET=http://api:8080
+      - NODE_ENV=development
+      # Fix for Node.js crypto in Docker
+      - NODE_OPTIONS=--experimental-vm-modules
+    volumes:
+      - ./clamav-sveltekit:/app
+      - /app/node_modules
+    command: npm run dev -- --host 0.0.0.0
     depends_on:
       - api
     networks:
@@ -24,7 +28,7 @@ services:
     build:
       context: ./clamav-server
       dockerfile: Dockerfile
-    container_name: clamav-api
+    container_name: clamav-api-dev
     restart: unless-stopped
     ports:
       - "8080:8080"
@@ -39,7 +43,7 @@ services:
   clamd:
     image: clamav/clamav:latest
     platform: linux/amd64
-    container_name: clamd
+    container_name: clamd-dev
     restart: unless-stopped
     ports:
       - "3310:3310"
@@ -57,4 +61,4 @@ services:
 # Define a network for the services to communicate
 networks:
   clamav-network:
-    driver: bridge
+    driver: bridge 
